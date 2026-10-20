@@ -46,6 +46,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let saved = UserDefaults.standard.double(forKey: "wheelScale")
         if saved > 0 { WheelView.scale = CGFloat(saved) }
         setUpMenu()
+        DispatchQueue.main.async { MoveToApplications.offerIfNeeded() }
         if !UserDefaults.standard.bool(forKey: "didShowWelcome") {
             UserDefaults.standard.set(true, forKey: "didShowWelcome")
             DispatchQueue.main.async { self.openSettings() }

@@ -51,8 +51,9 @@ Output files are never overwritten: `photo.webp`, then `photo 2.webp`, and so on
 
 ## Install (download)
 
-1. Download `WheelOfTools-<version>.zip` from the **Releases** page and unzip it.
-2. Move **Wheel of Tools.app** to `/Applications` (or `~/Applications`).
+1. Download `WheelOfTools-<version>.dmg` from the **Releases** page and open it.
+2. Drag **Wheel of Tools** onto the **Applications** folder in the window that appears.
+   (A `.zip` is also provided; unzip it and move the app to Applications yourself.)
 3. The app is not notarized, so macOS blocks the first launch. Either right-click the app → **Open** →
    **Open**, or run: `xattr -dr com.apple.quarantine "/Applications/Wheel of Tools.app"`
 4. Install the tools you want (the Settings window shows what is missing and copies the command for you):
@@ -67,18 +68,19 @@ Without them the wheel still works for editing images, PDF tools and macOS-nativ
 ## Build and install
 
 ```sh
-scripts/make_app.sh      # builds a release app, ad-hoc signs it, installs to ~/Applications
-open ~/Applications/"Wheel of Tools.app"
+scripts/make_app.sh      # builds a release app, ad-hoc signs it, installs to /Applications (or ~/Applications)
+open "/Applications/Wheel of Tools.app"
 ```
 
-The app lives in the menu bar (dial icon). Open it again from Finder or Spotlight, or choose
+If you launch the app from somewhere else (Downloads, a disk image), it offers to move itself to
+Applications. The app lives in the menu bar (dial icon). Open it again from Finder or Spotlight, or choose
 **Settings…** (⌘,), to change the wheel size, preview it, or turn on Open at login.
 
 ## Publishing a release
 
 ```sh
-scripts/package_release.sh 1.0          # -> build/WheelOfTools-1.0.zip (+ SHA-256)
-gh release create v1.0 build/WheelOfTools-1.0.zip --title "Wheel of Tools 1.0" --notes "See README for install steps."
+scripts/package_release.sh 1.2          # -> build/WheelOfTools-1.2.dmg and .zip (+ SHA-256)
+gh release create v1.2 build/WheelOfTools-1.2.dmg build/WheelOfTools-1.2.zip --title "Wheel of Tools 1.2" --notes "See README for install steps."
 ```
 
 ## Tests

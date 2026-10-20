@@ -2,6 +2,8 @@
 # Builds Wheel of Tools.app and installs it to ~/Applications.
 set -e
 cd "$(dirname "$0")/.."
+VERSION="${VERSION:-1.2}"
+BUILD="$(git rev-list --count HEAD 2>/dev/null || echo 1)"
 swift build -c release
 APP="build/Wheel of Tools.app"
 rm -rf "$APP"; mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
@@ -17,8 +19,8 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>CFBundleExecutable</key><string>WheelOfTools</string>
   <key>CFBundleIconFile</key><string>AppIcon</string>
   <key>CFBundlePackageType</key><string>APPL</string>
-  <key>CFBundleShortVersionString</key><string>1.0</string>
-  <key>CFBundleVersion</key><string>1</string>
+  <key>CFBundleShortVersionString</key><string>$VERSION</string>
+  <key>CFBundleVersion</key><string>$BUILD</string>
   <key>LSMinimumSystemVersion</key><string>14.0</string>
   <key>LSUIElement</key><true/>
   <key>NSHighResolutionCapable</key><true/>
@@ -26,7 +28,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
 PLIST
 xattr -cr "$APP"
 codesign --force --sign - "$APP"
-mkdir -p ~/Applications
-rm -rf ~/Applications/"Wheel of Tools.app"
-cp -R "$APP" ~/Applications/
-echo "Installed: ~/Applications/Wheel of Tools.app"
+DEST=/Applications; [ -w "$DEST" ] || { DEST="$HOME/Applications"; mkdir -p "$DEST"; }
+rm -rf "$DEST/Wheel of Tools.app"
+cp -R "$APP" "$DEST/"
+echo "Installed: $DEST/Wheel of Tools.app"
