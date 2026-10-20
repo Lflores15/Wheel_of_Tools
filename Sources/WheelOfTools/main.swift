@@ -3,7 +3,7 @@ import SwiftUI
 import WheelCore
 
 @MainActor
-final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDelegate {
     private let panel = WheelPanel()
     private let watcher = DragWatcher()
     private var statusItem: NSStatusItem!
@@ -27,10 +27,42 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             window.isReleasedWhenClosed = false
             window.contentView = NSHostingView(rootView: SettingsView(onPreview: { [weak self] in self?.preview(.convert) }))
             window.center()
+            window.delegate = self
             settingsWindow = window
         }
+        // Show the app (with its icon) in the Dock while settings are open.
+        NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
         settingsWindow?.makeKeyAndOrderFront(nil)
+    }
+
+    /// Back to menu-bar-only once settings close.
+    func windowWillClose(_ notification: Notification) {
+        guard (notification.object as? NSWindow) === settingsWindow else { return }
+        NSApp.setActivationPolicy(.accessory)
+    }
+
+    /// Minimal main menu so ⌘Q and ⌘, work while the app has a Dock icon.
+    private func setUpMainMenu() {
+        let main = NSMenu()
+        let appItem = NSMenuItem()
+        main.addItem(appItem)
+        let appMenu = NSMenu()
+        let prefs = NSMenuItem(title: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
+        prefs.target = self
+        appMenu.addItem(prefs)
+        appMenu.addItem(.separator())
+        appMenu.addItem(NSMenuItem(title: "Hide Wheel of Tools", action: #selector(NSApplication.hide(_:)), keyEquivalent: "h"))
+        appMenu.addItem(NSMenuItem(title: "Quit Wheel of Tools", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+        appItem.submenu = appMenu
+        let windowItem = NSMenuItem()
+        main.addItem(windowItem)
+        let windowMenu = NSMenu(title: "Window")
+        windowMenu.addItem(NSMenuItem(title: "Close", action: #selector(NSWindow.performClose(_:)), keyEquivalent: "w"))
+        windowMenu.addItem(NSMenuItem(title: "Minimize", action: #selector(NSWindow.performMiniaturize(_:)), keyEquivalent: "m"))
+        windowItem.submenu = windowMenu
+        NSApp.mainMenu = main
+        NSApp.windowsMenu = windowMenu
     }
 
     /// Launching the app again (Finder, Spotlight, Dock) opens settings.
@@ -46,6 +78,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let saved = UserDefaults.standard.double(forKey: "wheelScale")
         if saved > 0 { WheelView.scale = CGFloat(saved) }
         setUpMenu()
+        setUpMainMenu()
         DispatchQueue.main.async { MoveToApplications.offerIfNeeded() }
         if !UserDefaults.standard.bool(forKey: "didShowWelcome") {
             UserDefaults.standard.set(true, forKey: "didShowWelcome")

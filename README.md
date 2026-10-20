@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo-banner.jpg" alt="Wheel of Tools: drag a file, hold Shift to convert, hold Control for tools" width="720" />
+</p>
+
 # Wheel of Tools
 
 A macOS menu-bar app. Drag a file in Finder, hold a modifier key, and a glass wheel appears under your
